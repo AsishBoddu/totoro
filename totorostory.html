@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Totoro's Secret Story for Potato</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --totoro-gray: #8c8c8c;
+            --forest-green: #4a6741;
+            --soft-cream: #f9f7f2;
+            --heart-red: #ff4d6d;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(180deg, #a8dadc 0%, #f1faee 100%);
+            overflow: hidden;
+            margin: 0;
+            height: 100vh;
+            touch-action: manipulation;
+        }
+
+        .totoro-font { font-family: 'Cherry Bomb One', cursive; }
+
+        /* Rain effect */
+        .rain-drop {
+            position: fixed;
+            background-color: rgba(255, 255, 255, 0.6);
+            width: 2px;
+            height: 15px;
+            top: -20px;
+            z-index: 1;
+            pointer-events: none;
+            animation: fall linear infinite;
+        }
+        @keyframes fall { to { transform: translateY(100vh); } }
+
+        .bounce { animation: bounce 2s ease-in-out infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+
+        .shake { animation: shake 0.5s ease-in-out; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+
+        .hidden { display: none !important; }
+
+        .btn-yes {
+            background-color: var(--heart-red);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-yes:hover { transform: scale(1.1); box-shadow: 0 10px 20px rgba(255, 77, 109, 0.4); }
+
+        .fade-in { animation: fadeIn 0.8s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Floating leaves */
+        .leaf {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            background-color: #74a12e;
+            border-radius: 0 100%;
+            z-index: 1;
+            opacity: 0.4;
+            animation: float 10s linear infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(-20px) rotate(0deg); left: -5%; }
+            100% { transform: translateY(100vh) rotate(360deg); left: 105%; }
+        }
+    </style>
+</head>
+<body class="bg-[#f1faee]">
+
+    <div id="rain-container"></div>
+    <div id="leaf-container"></div>
+
+    <!-- 1. INTRO SCREEN -->
+    <div id="intro-screen" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl text-center max-w-sm border-4 border-[#4a6741]">
+            <h1 class="totoro-font text-4xl text-[#4a6741] mb-4">Hi Potato! 🥔</h1>
+            <p class="text-lg text-gray-700 mb-6">Totoro has been waiting in the forest for a very long time just to see you...</p>
+            <button onclick="startStory()" class="bg-[#4a6741] text-white px-8 py-3 rounded-full text-xl font-bold hover:bg-[#3a5234] transition-colors shadow-lg">
+                Walk with him 🍃
+            </button>
+        </div>
+    </div>
+
+    <!-- 2. STORY AREA -->
+    <div id="story-container" class="fixed inset-0 flex items-center justify-center p-4 hidden z-10">
+        <div class="relative text-center max-w-2xl">
+            <!-- Totoro Graphic -->
+            <div id="totoro-wrapper" class="mb-8 flex justify-center">
+                <svg id="totoro-graphic" class="bounce w-48 h-48 md:w-64 md:h-64" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="100" cy="110" rx="70" ry="80" fill="#8c8c8c" />
+                    <ellipse cx="100" cy="125" rx="50" ry="55" fill="#f5f5dc" />
+                    <path d="M85 100 Q100 90 115 100" stroke="#8c8c8c" stroke-width="4" fill="none" />
+                    <path d="M75 115 Q100 105 125 115" stroke="#8c8c8c" stroke-width="4" fill="none" />
+                    <path d="M85 130 Q100 120 115 130" stroke="#8c8c8c" stroke-width="4" fill="none" />
+                    <circle cx="75" cy="70" r="8" fill="white" />
+                    <circle cx="75" cy="70" r="3" fill="black" />
+                    <circle cx="125" cy="70" r="8" fill="white" />
+                    <circle cx="125" cy="70" r="3" fill="black" />
+                    <ellipse cx="100" cy="75" rx="8" ry="4" fill="#333" />
+                    <path d="M65 40 Q75 10 85 45" fill="#8c8c8c" />
+                    <path d="M115 45 Q125 10 135 40" fill="#8c8c8c" />
+                    <line x1="40" y1="80" x2="65" y2="85" stroke="#333" stroke-width="2" />
+                    <line x1="40" y1="95" x2="65" y2="95" stroke="#333" stroke-width="2" />
+                    <line x1="135" y1="85" x2="160" y2="80" stroke="#333" stroke-width="2" />
+                    <line x1="135" y1="95" x2="160" y2="95" stroke="#333" stroke-width="2" />
+                    <g id="umbrella" style="display: none;">
+                        <path d="M30 60 Q100 -20 170 60" fill="#d62828" />
+                        <line x1="100" y1="60" x2="100" y2="150" stroke="#333" stroke-width="4" />
+                    </g>
+                </svg>
+            </div>
+
+            <!-- Dialogue Box -->
+            <div class="bg-white/90 backdrop-blur-md p-6 rounded-3xl shadow-xl border-2 border-[#4a6741]/20">
+                <p id="story-text" class="text-xl md:text-2xl text-gray-800 font-semibold mb-6 italic leading-relaxed">
+                    The forest is quiet today, Potato. Just the sound of the rain...
+                </p>
+                <button id="next-btn" onclick="nextStep()" class="bg-[#4a6741] text-white px-6 py-2 rounded-full font-bold hover:bg-[#3a5234] transition-all">
+                    Next ➡️
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. FINAL PROPOSAL SCREEN -->
+    <div id="proposal-screen" class="fixed inset-0 z-[300] hidden flex items-center justify-center p-4">
+        <div class="bg-white/95 backdrop-blur-md p-10 rounded-3xl shadow-2xl max-w-lg w-full text-center border-4 border-[#ff4d6d]/30">
+            <h1 class="totoro-font text-4xl md:text-5xl text-[#4a6741] mb-2">Potato...</h1>
+            <p class="text-2xl text-gray-700 mb-8 font-bold">Will you be my Valentine?</p>
+
+            <div class="flex flex-col sm:flex-row gap-6 justify-center items-center relative min-h-[120px]">
+                <button id="yesBtn" class="btn-yes px-12 py-5 text-white rounded-full text-3xl font-bold shadow-lg z-20">
+                    YES! 🍃
+                </button>
+                <button id="noBtn" class="bg-gray-400 px-8 py-3 text-white rounded-full text-xl font-bold shadow-md transition-all">
+                    No
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. SUCCESS SCREEN -->
+    <div id="success-screen" class="fixed inset-0 z-[400] hidden flex items-center justify-center p-4">
+        <div class="bg-white/95 p-10 rounded-3xl shadow-2xl text-center border-4 border-[#d62828]">
+            <h1 class="totoro-font text-6xl text-[#d62828] mb-4">Yay! ❤️</h1>
+            <p class="text-3xl text-[#4a6741] font-bold">I'll bring the Catbus!</p>
+            <div class="mt-8 flex justify-center gap-4">
+                <span class="text-6xl animate-bounce">🐱</span>
+                <span class="text-6xl animate-pulse">🚌</span>
+                <span class="text-6xl">🌂</span>
+            </div>
+            <p class="mt-10 text-xl italic text-gray-600 font-bold border-t pt-4">i will try to come this month potato</p>
+        </div>
+    </div>
+
+    <div id="msg-box" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-black/70 text-white px-6 py-3 rounded-full opacity-0 transition-opacity duration-300 pointer-events-none z-[500]">
+        You can't say no to Totoro, Potato!
+    </div>
+
+    <script>
+        let currentStep = 0;
+        const storySteps = [
+            "The forest is quiet today, Potato. Just the sound of the rain...",
+            "Totoro found a giant leaf to shelter you from the storm. 🍃",
+            "He has been holding onto something very small, and very special...",
+            "He was a bit too shy to show it to anyone else.",
+            "But since you're his favorite neighbor, he's finally ready to ask..."
+        ];
+
+        function startStory() {
+            document.getElementById('intro-screen').classList.add('hidden');
+            document.getElementById('story-container').classList.remove('hidden');
+            createRain();
+            createLeaves();
+        }
+
+        function nextStep() {
+            currentStep++;
+            const textEl = document.getElementById('story-text');
+            const totoro = document.getElementById('totoro-graphic');
+
+            if (currentStep < storySteps.length) {
+                // Fade out/in text effect
+                textEl.classList.remove('fade-in');
+                void textEl.offsetWidth; // Trigger reflow
+                textEl.innerText = storySteps[currentStep];
+                textEl.classList.add('fade-in');
+                
+                // Small totoro reaction
+                totoro.classList.add('shake');
+                setTimeout(() => totoro.classList.remove('shake'), 500);
+            } else {
+                triggerProposal();
+            }
+        }
+
+        function triggerProposal() {
+            document.getElementById('story-container').classList.add('hidden');
+            document.getElementById('proposal-screen').classList.remove('hidden');
+            document.getElementById('proposal-screen').classList.add('fade-in');
+        }
+
+        // --- Proposal Logic ---
+        const yesBtn = document.getElementById('yesBtn');
+        const noBtn = document.getElementById('noBtn');
+        let noCount = 0;
+
+        noBtn.addEventListener('click', () => {
+            noCount++;
+            const x = Math.random() * (window.innerWidth - 150);
+            const y = Math.random() * (window.innerHeight - 100);
+            
+            noBtn.style.position = 'fixed';
+            noBtn.style.left = x + 'px';
+            noBtn.style.top = y + 'px';
+            noBtn.style.zIndex = '1000';
+            
+            const msg = document.getElementById('msg-box');
+            msg.style.opacity = '1';
+            setTimeout(() => msg.style.opacity = '0', 1500);
+
+            yesBtn.style.transform = `scale(${1 + (noCount * 0.25)})`;
+        });
+
+        yesBtn.addEventListener('click', () => {
+            document.getElementById('proposal-screen').classList.add('hidden');
+            document.getElementById('success-screen').classList.remove('hidden');
+            document.getElementById('umbrella').style.display = 'block';
+            
+            setInterval(createHeart, 200);
+        });
+
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.innerHTML = '❤️';
+            heart.style.position = 'fixed';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.top = '110vh';
+            heart.style.fontSize = (Math.random() * 30 + 20) + 'px';
+            heart.style.zIndex = '500';
+            heart.style.transition = 'all 4s linear';
+            document.body.appendChild(heart);
+
+            setTimeout(() => {
+                heart.style.top = '-20vh';
+                heart.style.transform = `rotate(${Math.random() * 360}deg)`;
+                heart.style.opacity = '0';
+            }, 100);
+            setTimeout(() => heart.remove(), 4100);
+        }
+
+        function createRain() {
+            const container = document.getElementById('rain-container');
+            for (let i = 0; i < 40; i++) {
+                const drop = document.createElement('div');
+                drop.className = 'rain-drop';
+                drop.style.left = Math.random() * 100 + 'vw';
+                drop.style.animationDuration = (Math.random() * 0.5 + 0.5) + 's';
+                drop.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(drop);
+            }
+        }
+
+        function createLeaves() {
+            const container = document.getElementById('leaf-container');
+            for (let i = 0; i < 15; i++) {
+                const leaf = document.createElement('div');
+                leaf.className = 'leaf';
+                leaf.style.left = Math.random() * 100 + 'vw';
+                leaf.style.top = '-20px';
+                leaf.style.animationDuration = (Math.random() * 5 + 5) + 's';
+                leaf.style.animationDelay = Math.random() * 5 + 's';
+                container.appendChild(leaf);
+            }
+        }
+    </script>
+</body>
+</html>
